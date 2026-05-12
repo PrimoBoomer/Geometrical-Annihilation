@@ -6,7 +6,7 @@ use thiserror::Error;
 use tokio::net::TcpListener;
 use tungstenite::Message;
 
-use crate::protocol::ClientAction;
+use crate::protocol::ClientMessage;
 
 #[derive(Error, Debug)]
 enum Error {
@@ -24,9 +24,19 @@ mod protocol {
     use serde_derive::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize)]
-    pub(crate) enum ClientAction {
+    pub(crate) enum ClientMessage {
         Authentication { nickname: String },
+        Action,
     }
+
+    #[derive(Serialize, Deserialize)]
+    pub(crate) enum ServerMessage {
+        AuthResponse { result: bool, reason: String },
+    }
+}
+
+struct Client {
+    nickname: String,
 }
 
 async fn run() -> Result<()> {
@@ -34,26 +44,33 @@ async fn run() -> Result<()> {
         .await
         .map_err(|err| Error::ConnectionFailed(err.to_string()))?;
 
+    let authenticated_clients: Vec<String> = Vec::new();
+
     loop {
         if let Ok((socket, addr)) = listenner.accept().await {
             tokio::spawn(async move {
-                process_socket(socket, addr).await;
+                process_socket(socket, addr, authenticated_clients).await;
             });
         }
     }
 }
 
-async fn process_socket(socket: tokio::net::TcpStream, addr: std::net::SocketAddr) -> Result<()> {
+async fn process_socket(
+    socket: tokio::net::TcpStream,
+    addr: std::net::SocketAddr,
+    authenticated_clients: Vec<String>,
+) -> Result<()> {
     trace!("Connected: {addr}");
     let websocket = tokio_tungstenite::accept_async(socket)
         .await
         .map_err(|err| Error::ConnectionFailed(err.to_string()))?;
-    Ok(process_websocket(websocket, addr).await?)
+    Ok(process_websocket(websocket, addr, authenticated_clients).await?)
 }
 
 async fn process_websocket(
     websocket: tokio_tungstenite::WebSocketStream<tokio::net::TcpStream>,
     addr: std::net::SocketAddr,
+    authenticated_clients: Vec<String>,
 ) -> Result<()> {
     trace!("Upgraded: {addr}");
     let (_writer, mut reader) = websocket.split();
@@ -61,18 +78,27 @@ async fn process_websocket(
     loop {
         if let Some(maybe_message) = reader.next().await {
             let message = maybe_message.map_err(|err| Error::ReadFailed(err.to_string()))?;
-            process_message(message, addr).await?;
+            process_message(message, addr, authenticated_clients).await?;
         } else {
             return Err(Error::ReadFailed("Nothing to read".to_string()));
         }
     }
 }
 
-async fn process_message(message: tungstenite::Message, addr: std::net::SocketAddr) -> Result<()> {
+async fn process_message(
+    message: tungstenite::Message,
+    addr: std::net::SocketAddr,
+    authenticated_clients: Vec<String>,
+) -> Result<()> {
     trace!("Message: {addr}");
     if let Message::Text(text) = message {
-        let client_action: ClientAction =
+        let client_action: ClientMessage =
             serde_json::from_str(text.as_str()).map_err(|_err| Error::BadProtocol)?;
+        match client_action {
+            ClientMessage::Authentication { nickname } => {
+                if authenticated_clients.contains(&nickname) {}
+            }
+        }
         Ok(())
     } else {
         Err(Error::BadProtocol)
