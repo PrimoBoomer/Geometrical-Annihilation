@@ -11,13 +11,21 @@ config_version=5
 [application]
 
 config/name="Geometrical Annihilation"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
+run/main_scene="res://scenes/main.tscn"
 
-[physics]
+[autoload]
 
-3d/physics_engine="Jolt Physics"
+WSClient="*res://scripts/ws_client.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
 
 [rendering]
 
-rendering_device/driver.windows="d3d12"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

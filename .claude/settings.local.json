@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo build *)",
+      "Bash(godot --version)",
+      "Bash(godot --headless --path client --import)",
+      "Bash(mkdir -p client/export/web)",
+      "Bash(godot --headless --path client --export-release \"Web\" \"$\\(pwd\\)/client/export/web/index.html\")",
+      "Bash(ls -la \"C:/Users/Primo/AppData/Roaming/Godot/export_templates/\" 2>&1)",
+      "Read(//c/Users/Primo/AppData/Roaming/Godot/export_templates/**)",
+      "Bash(mkdir -p \"C:/Users/Primo/AppData/Roaming/Godot/export_templates/4.6.2.stable\")",
+      "Bash(curl -L --fail --progress-bar -o \"/tmp/godot-templates.tpz\" \"https://github.com/godotengine/godot-builds/releases/download/4.6.2-stable/Godot_v4.6.2-stable_export_templates.tpz\")",
+      "Bash(ls -la /tmp/godot-templates.tpz)",
+      "Read(//tmp/**)",
+      "Bash(cp /tmp/tpz-extract/templates/* \"C:/Users/Primo/AppData/Roaming/Godot/export_templates/4.6.2.stable/\" && ls \"C:/Users/Primo/AppData/Roaming/Godot/export_templates/4.6.2.stable/\" | grep web)",
+      "Bash(rm -rf /tmp/tpz-extract)",
+      "Bash(mkdir -p \"C:/Users/Primo/AppData/Local/GeometricalAnnihilation/cache\")",
+      "Bash(mv /tmp/godot-templates.tpz \"C:/Users/Primo/AppData/Local/GeometricalAnnihilation/cache/Godot_v4.6.2-stable_export_templates.tpz\")",
+      "Read(//c/Users/Primo/AppData/Local/GeometricalAnnihilation/**)",
+      "Bash(RUST_LOG=info ./server/target/release/server.exe)",
+      "Bash(python scripts/serve-web.py)",
+      "Bash(where python *)",
+      "Bash(where py *)",
+      "Bash(where python3 *)",
+      "Bash(\"C:\\\\Users\\\\Primo\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" --version)",
+      "Bash(\"C:\\\\Users\\\\Primo\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" scripts/serve-web.py)",
+      "Bash(curl -sI http://127.0.0.1:8081/index.html)"
+    ],
+    "additionalDirectories": [
+      "\\tmp\\tpz-extract\\templates"
+    ]
+  }
+}
